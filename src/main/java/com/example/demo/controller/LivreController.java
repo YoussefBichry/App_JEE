@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import java.util.List;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,59 +12,37 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.Exceptions.LivresNotFoundException;
 import com.example.demo.entities.Livre;
-import com.example.demo.repos.LivreRepo;
+import com.example.demo.service.LivreService;
 
 @RestController
-@RequestMapping("emsi_api")
+@RequestMapping("/emsi_api/livres")
 public class LivreController {
-	private final LivreRepo repo;
-	LivreController(LivreRepo repo)
-	{
-		this.repo = repo;
+	@Autowired
+	LivreService livreService;
+	
+	@GetMapping("/List")
+	public List<Livre> getAll() {
+	return livreService.findbytitle();
 	}
-	 // Aggregate root
-	  // tag::get-aggregate-root[]
-	  @GetMapping("/livres")
-	  List<Livre> all() {
-	    return repo.findAllByOrderByDateAsc();
-	  }
-	  // end::get-aggregate-root[]
-	  @PostMapping("/ajout_livre")
-	  Livre newLivre(Livre newLivre) {
-	    return repo.save(newLivre);
-	  }
-	  
-	  @GetMapping("/livres/{id}")
-	  Livre one(@PathVariable Long id) {
-	    
-	    return repo.findById(id).orElseThrow(() -> new LivresNotFoundException(id));
-	  }
-	  @PutMapping("/livres/{id}")
-	  Livre replaceEmployee(@RequestBody Livre newLivre, @PathVariable Long id) {
-	    
-	    return repo.findById(id)
-	      .map(livre -> {
-	        livre.setTitre(newLivre.getTitre());
-	        livre.setMaisonEdition(newLivre.getMaisonEdition());
-	        livre.SetDateSortie(newLivre.getDate_sortie());
-	        livre.setAuteur(newLivre.getAuteur());
-	        livre.SetNbrPage(newLivre.getNbr_page());
-	        livre.setIsbn(newLivre.getIsbn());
-	        livre.setIsDispo(newLivre.getIsDispo());
-	        livre.setDateDernierConsu(newLivre.getDateDernierConsu());
-	        return repo.save(livre);
-	      })
-	      .orElseGet(() -> {
-	        newLivre.setId(id);
-	        return repo.save(newLivre);
-	      });
-	  }
-	  
-	  @DeleteMapping("/livres/{id}")
-	  void deleteEmployee(@PathVariable Long id) {
-	    repo.deleteById(id);
-	  }
-	  
+	@GetMapping("/{id}")
+	public Livre getLivre(@PathVariable long id) {
+		return livreService.getLivre(id);
+	}
+	@DeleteMapping("/{id}")
+	public void deleteLivre(@PathVariable long id) {
+	livreService.deleteLivre(id);
+	}
+	@PutMapping("/{id}")
+	public void modifieLivre(@PathVariable long id, @RequestBody Livre l) {
+	livreService.modifier(id, l);
+	}
+	@PostMapping
+	public Livre create(@RequestBody Livre livre) {
+	//  Auto-generated method stub
+	return livreService.create(livre);
+
+	 }
+
 }
+
